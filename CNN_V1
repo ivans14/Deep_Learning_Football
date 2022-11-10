@@ -1,0 +1,47 @@
+# CNN model
+out_features = 2 # Ball and players
+
+class Model(nn.Module):
+    def __init__(self,out_classes):
+        super().__init__()
+        self.out_classes = out_classes
+        activation_fn = nn.ReLU(0.1)
+        linear_inputs =
+        # Defining a Sequential pipeline for the entire CNN
+        self.net = nn.Sequential(
+            nn.Conv2d(in_channels = , out_channels = ,
+                     kernel_size = ),
+            activation_fn,
+            LocalResponseNorm(2),   # Check: https://towardsdatascience.com/difference-between-local-response-normalization-and-batch-normalization-272308c034ac
+            nn.MaxPool2d(kernel_size = ,
+                        stride =),
+            
+            nn.Conv2d(in_channels = ,
+                     out_channels = ,
+                     kernel_size = ),
+            nn.MaxPool2d(kernel_size = ,
+                        stride =),
+            
+            nn.Flatten(), # Flattens a contiguous range of dims into a tensor.
+            # FFNN
+            activation_fn,
+            nn.Linear(36*9*9,),
+            nn.Dropout(0.5),
+            nn.Sigmoid(),
+            nn.Linear(,self.out_classes),
+            nn.Dropout(0.25),
+            nn.Sigmoid()
+        )
+      
+    def forward(self):
+
+      return self.net(nn.sotmax(x))
+
+NN = Model(out_classes)
+device = device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')  # use cuda if possible
+model.to(device)
+print(model)
+
+# Definition of optimizer and loss functions
+optimizer = optim.Adam(NN.parameters(),lr=0.008)
+loss_fn = nn.CrossEntropyLoss() 
