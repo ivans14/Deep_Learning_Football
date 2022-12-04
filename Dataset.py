@@ -3,6 +3,8 @@ import pandas as pd
 import cv2
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
+import random
+import matplotlib.pyplot as plt
 
 # Create a Dataset class
 class img_dataset(torch.utils.data.Dataset):
@@ -75,9 +77,9 @@ def get_transform(train):
         return A.Compose(
             [
                 A.HorizontalFlip(0.5),
-                A.SmallestMaxSize(shift_limit = 0.05, scale_limit=0.05, rotate_limit=360, p=0.5),
-                A.RandomBrightnessContrast(p=0.5),
-                A.MultiplicativeNoise(multiplier=[0.5,2], per_channel=True, p=0.2),
+                #A.SmallestMaxSize(shift_limit = 0.05, scale_limit=0.05, rotate_limit=360, p=0.5),
+                #A.RandomBrightnessContrast(p=0.5),
+                #A.MultiplicativeNoise(multiplier=[0.5,2], per_channel=True, p=0.2),
                 ToTensorV2(p=1.0)
             ],
             bbox_params={'format': 'pascal_voc', 'label_fields': ['labels']}
@@ -88,6 +90,67 @@ def get_transform(train):
             bbox_params={'format': 'pascal_voc', 'label_fields': ['labels']}
         )
 
+def create_datasets():
+    directory_train = 'proj_test/Train'
 
+    # Load Train data
+    train_labels = pd.read_csv(directory_train + "/proj_det/det.txt", sep=',')
+    train_images = directory_train + "/proj_img1/{}.jpg"
+    train_images = [train_images.format(str(i).zfill(6)) for i in range(1,len(train_labels['frame'].unique()))] # train_labels.index.values
+    train_labels = [train_labels.columns.values.tolist()] + train_labels.values.tolist() # Convert DF to list
 
+    #print(train_labels[0:5][0:7])
 
+    # Load Test data
+    directory_test = 'proj_test/Test'
+
+    test_labels = pd.read_csv(directory_test + '/proj_det/det.txt', sep=',', index_col=0)
+    test_images = directory_test + "/proj_img1/{}.jpg"
+    test_images = [test_images.format(str(i).zfill(6)) for i in range(1,751)]
+    test_labels = [test_labels.columns.values.tolist()] + test_labels.values.tolist()
+
+    return train_labels, train_images, test_labels, test_images
+
+def create_datasetClases(train_labels,train_images,test_labels,test_images):
+    directory_train = 'proj_test/Train'
+    directory_test = 'proj_test/Test'
+
+    train_ds = img_dataset(1080,1920,directory_train + "/proj_img1/",train_labels,train_images, transforms=get_transform(train=True))
+    test_ds = img_dataset(1080,1920,directory_test + "/proj_img1/",test_labels,test_images, mode='test', transforms=get_transform(train=False))
+    return train_ds, test_ds
+
+# To show a random train image and its bboxes
+def show_random_image_boxes(img_dataset):
+    idx_2print = random.randint(1, len(img_dataset.images))
+    ran_img, boxes = img_dataset[idx_2print]
+
+    img_2plot = ((ran_img.permute(1,2,0)).numpy()).copy()
+
+    fig = plt.figure(figsize=(10,8))
+    boxes_list = (boxes.get("boxes")).tolist()
+    target_list = (boxes.get("labels")).tolist()   
+
+    for i in range((boxes.get("boxes").shape)[0]):
+        x = int(boxes_list[i][0])
+        y = int(boxes_list[i][1])
+        x_max = int(boxes_list[i][2])
+        y_max = int(boxes_list[i][3])
+        if (target_list[i] == 1):
+            cv2.rectangle(img_2plot, (x,y),(x_max,y_max),(255,0,0),5)
+            cv2.putText(img= img_2plot, text = str(target_list[i]), org = (x, y),fontFace = cv2.FONT_HERSHEY_TRIPLEX, fontScale = 2, color = (255,0,0), thickness= 2, lineType=cv2.LINE_AA)
+        elif (target_list[i] == 2): # Rectangle for ball in blue
+            cv2.rectangle(img_2plot, (x,y),(x_max,y_max),(0,0,255),6)
+            cv2.putText(img= img_2plot, text = str(target_list[i]), org = (x, y),fontFace = cv2.FONT_HERSHEY_TRIPLEX, fontScale = 2, color = (0,0,255), thickness= 2, lineType=cv2.LINE_AA)
+        
+    plt.imshow(img_2plot)
+    plt.axis('off')
+    plt.title("Figure num. " + str(((boxes.get("image_id")).tolist())[0]))
+    fig.show
+
+if __name__ == '__main__':
+
+    train_labels, train_images, test_labels, test_images = create_datasets()
+    train_ds, test_ds = create_datasetClases(train_labels,train_images,test_labels,test_images)
+
+    show_random_image_boxes(train_ds)
+    print("Data imported successfully :)")
