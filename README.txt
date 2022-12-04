@@ -3,7 +3,7 @@
 - Train.py
 - Test.py
 - Run.py (main)
-- dataloader.py
+- Dataset.py
 
 - Data/
 	- Train/
