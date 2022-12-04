@@ -48,8 +48,8 @@ class img_dataset(torch.utils.data.Dataset):
                     labels.append(self.labels_list[line][-1])
 
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
-        print(boxes)
-        print(boxes.shape)
+        #print(boxes)
+        #print(boxes.shape)
         labels = torch.as_tensor(labels, dtype=torch.int64)
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
         iscrowd = torch.zeros((boxes.shape[0],), dtype=torch.int64)
@@ -122,8 +122,10 @@ def create_datasetClases(train_labels,train_images,test_labels,test_images):
     directory_test = 'proj_test/Test'
 
     train_ds = img_dataset(1080,1920,directory_train + "/proj_img1/",train_labels,train_images, transforms=get_transform(train=True))
+    val_ds = img_dataset(1080,1920,directory_train + "/proj_img1/",train_labels,train_images, transforms=get_transform(train=False))
     test_ds = img_dataset(1080,1920,directory_test + "/proj_img1/",test_labels,test_images, mode='test', transforms=get_transform(train=False))
-    return train_ds, test_ds
+    
+    return train_ds, val_ds, test_ds
 
 # To show a random train image and its bboxes
 def show_random_image_boxes(img_dataset):

@@ -4,7 +4,7 @@ import torch
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
-from Dataset import img_dataset, get_transform
+from Dataset import img_dataset, get_transform, create_datasets, create_datasetClases, show_random_image_boxes
 
 import files.utils as utils
 import files.transforms as T
@@ -20,44 +20,38 @@ def get_object_detection_model(num_classes):
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes) 
     return model
 
-def main():
+def train():
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-   
-   # Load train data
-    directory_train = 'proj_test/train'
+    torch.cuda.empty_cache() # To clear the cache in Cuda so we have more room for the data to upload into GPU.
 
-    train_labels = pd.read_csv(directory_train + "/proj_det/det.txt", sep=',')
-    train_images = directory_train + "/proj_img1/{}.jpg"
-    train_images = [train_images.format(str(i).zfill(6)) for i in train_labels.index.values]
-    train_labels = [train_labels.columns.values.tolist()] + train_labels.values.tolist()
-
-    
-    train_ds = img_dataset(1080,1920,directory_train + "/proj_img1/",train_labels,train_images, transforms=get_transform(train=True))
-    val_ds = img_dataset(1080,1920,directory_train + "/proj_img1/",train_labels,train_images, mode='test', transforms=get_transform(train=False))
+    train_labels, train_images, test_labels, test_images = create_datasets()
+    train_ds, val_ds, _ = create_datasetClases(train_labels,train_images,test_labels,test_images)
 
     # split the dataset in train and validation set
+    torch.manual_seed(1)
     indices = torch.randperm(len(train_ds)).tolist()
-    train_ds = torch.utils.data.Subset(train_ds, indices[:-16])
-    val_ds = torch.utils.data.Subset(val_ds, indices[-16:])
+    split_size = int(len(train_ds)*0.2)
+    ds = torch.utils.data.Subset(train_ds, indices[:-split_size])
+    val_ds = torch.utils.data.Subset(val_ds, indices[-split_size:])
 
     data_loader_train = torch.utils.data.DataLoader(
-        train_ds,
-        batch_size=1,
-        suffle=True,
+        ds,
+        batch_size=2,
+        shuffle=True,
         num_workers=4,
         collate_fn=utils.collate_fn
     )
 
     data_loader_val = torch.utils.data.DataLoader(
         val_ds,
-        batch_size=10,
-        suffle=False,
+        batch_size=0,
+        shuffle=False,
         num_workers=4,
         collate_fn=utils.collate_fn
     )
 
-    num_classes = 2 #CLASS ZERO FOR BACKGROUND, 1 FOR PLAYERS AND 2 FOR BALL 
+    num_classes = 3 #CLASS ZERO FOR BACKGROUND, 1 FOR PLAYERS AND 2 FOR BALL 
 
     # get the model using our helper function
     model = get_object_detection_model(num_classes)
@@ -93,4 +87,5 @@ def main():
     print("Finished training.")
 
 if __name__ == '__main__':
-    main()
+    train()
+    print("Training successful :)")
