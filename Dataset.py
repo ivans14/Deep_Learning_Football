@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import pandas as pd
 import cv2
 import albumentations as A
@@ -39,7 +40,12 @@ class img_dataset(torch.utils.data.Dataset):
                 x_max = x + width
                 y_max = y + height
                 boxes.append([x,y,x_max,y_max])
-                labels.append(self.labels_list[line][7])
+                if int(self.labels_list[line][-1]) == -1:
+                    labels.append(1)
+                elif int(self.labels_list[line][-1]) == 1:
+                    labels.append(2)
+                else:
+                    labels.append(self.labels_list[line][-1])
 
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         print(boxes)
@@ -135,17 +141,19 @@ def show_random_image_boxes(img_dataset):
         y = int(boxes_list[i][1])
         x_max = int(boxes_list[i][2])
         y_max = int(boxes_list[i][3])
-        if (target_list[i] == 1):
-            cv2.rectangle(img_2plot, (x,y),(x_max,y_max),(255,0,0),5)
-            cv2.putText(img= img_2plot, text = str(target_list[i]), org = (x, y),fontFace = cv2.FONT_HERSHEY_TRIPLEX, fontScale = 2, color = (255,0,0), thickness= 2, lineType=cv2.LINE_AA)
-        elif (target_list[i] == 2): # Rectangle for ball in blue
+        
+        if (target_list[i] == 2): # Rectangle for ball in blue
             cv2.rectangle(img_2plot, (x,y),(x_max,y_max),(0,0,255),6)
             cv2.putText(img= img_2plot, text = str(target_list[i]), org = (x, y),fontFace = cv2.FONT_HERSHEY_TRIPLEX, fontScale = 2, color = (0,0,255), thickness= 2, lineType=cv2.LINE_AA)
-        
+        else:
+            cv2.rectangle(img_2plot, (x,y),(x_max,y_max),(255,0,0),5)
+            cv2.putText(img= img_2plot, text = str(target_list[i]), org = (x, y),fontFace = cv2.FONT_HERSHEY_TRIPLEX, fontScale = 2, color = (255,0,0), thickness= 2, lineType=cv2.LINE_AA)
+
     plt.imshow(img_2plot)
     plt.axis('off')
     plt.title("Figure num. " + str(((boxes.get("image_id")).tolist())[0]))
-    fig.show
+    plt.tight_layout(pad=1)
+    plt.show()
 
 if __name__ == '__main__':
 
