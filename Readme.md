@@ -1,6 +1,8 @@
 
 # Football Player and Element Detection with Deep Learning
 
+![Captura de pantalla 2024-09-09 211852](https://github.com/user-attachments/assets/6bdca30a-bd1b-4a86-a022-bc865d02efaa)
+
 ## Project Overview
 
 This project uses deep learning techniques to detect football players, identify their team affiliation (based on uniform colors), and recognize other elements such as the ball and the referee in any given image. The model is trained on a dataset of football images to distinguish between players, teams, referees, and the ball.
