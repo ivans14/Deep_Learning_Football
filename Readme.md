@@ -134,7 +134,7 @@ The models demonstrate strong performance across different scenarios:
 ### Research Contributions
 
 - **📈 Comprehensive Model Comparison**: Detailed analysis of one-stage vs two-stage detection methods
-- **🏈 Sports Analytics Focus**: Specialized application to amateur football analysis
+- **⚽ Sports Analytics Focus**: Specialized application to amateur football analysis
 - **💡 Data Processing Innovation**: Automatic ball labeling using frequency and dimension filtering
 - **🌍 Real-world Application**: Partnership with industry leader Veo Technologies
 
@@ -183,7 +183,7 @@ This project demonstrates the potential for automated football analysis systems 
 **Industry Partnership:**
 - 🤝 Direct collaboration with **Veo Technologies**
 - 🎥 Access to **Veo Cam 2** recording system data
-- 🏈 Real-world amateur football analysis challenges
+- ⚽ Real-world amateur football analysis challenges
 
 ## 📚 Documentation & Resources
 
